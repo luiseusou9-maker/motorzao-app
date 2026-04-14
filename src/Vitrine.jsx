@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // IMPORTADO PARA OS LINKS FUNCIONAREM
 import { supabase } from './lib/supabase';
 import LoginModal from './LoginModal';
-import CookieConsent from './CookieConsent'; // IMPORTADO
+import CookieConsent from './CookieConsent';
 
 const Vitrine = ({ session }) => {
   const [estoque, setEstoque] = useState([]);
@@ -19,14 +20,22 @@ const Vitrine = ({ session }) => {
   const isAdmin = session?.user?.email?.trim().toLowerCase() === 'luiseusou9@gmail.com';
 
   useEffect(() => {
+    // 1. CARREGAR ESTOQUE IMEDIATAMENTE (SEM TRAVA)
+    const carregar = async () => {
+      setCarregando(true);
+      const { data } = await supabase.from('cars').select('*').order('created_at', { ascending: false });
+      setEstoque(data || []);
+      setCarregando(false);
+    };
+    carregar();
+
+    // 2. LÓGICA DE LOGIN (APENAS PARA O MODAL)
     if (!session) {
       const timer = setTimeout(() => {
         setShowLogin(true);
       }, 10000);
       return () => clearTimeout(timer);
-    }
-
-    if (session) {
+    } else {
       const buscarPerfil = async () => {
         const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
         if (data) setPerfil({ nome: data.full_name || '', whatsapp: data.whatsapp || '', avatar: data.avatar_url || '' });
@@ -34,13 +43,6 @@ const Vitrine = ({ session }) => {
       buscarPerfil();
       setShowLogin(false);
     }
-
-    const carregar = async () => {
-      const { data } = await supabase.from('cars').select('*').order('created_at', { ascending: false });
-      setEstoque(data || []);
-      setCarregando(false);
-    };
-    carregar();
   }, [session]);
 
   const salvarPerfil = async () => {
@@ -80,7 +82,6 @@ const Vitrine = ({ session }) => {
                   <img key={idx} src={img} onClick={() => setFotoAtiva(idx)} className={`w-24 h-16 object-cover rounded-xl cursor-pointer border-2 transition-all ${fotoAtiva === idx ? 'border-orange-600 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`} />
                 ))}
               </div>
-              <p className="text-[8px] text-gray-600 uppercase font-bold italic text-center">Dica: Clique na foto para ampliar</p>
             </div>
             <div className="flex flex-col justify-center">
               <h2 className="text-4xl md:text-5xl font-[1000] italic uppercase leading-none mb-4 tracking-tighter">{c.modelo}</h2>
@@ -88,11 +89,9 @@ const Vitrine = ({ session }) => {
                 <span className="bg-orange-600 px-4 py-1.5 rounded-full text-[9px] font-black uppercase italic shadow-lg shadow-orange-600/20">{c.modalidade}</span>
                 <span className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[9px] font-black uppercase italic text-gray-400">{c.cambio}</span>
               </div>
-              
               <p className="text-5xl md:text-6xl font-mono font-[1000] text-[#00FF00] mb-8 tracking-tighter italic whitespace-nowrap">
                 R$ {c.preco?.toLocaleString('pt-BR')}
               </p>
-
               <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5 mb-8">
                 <p className="text-gray-400 text-sm leading-relaxed italic">{c.descricao}</p>
               </div>
@@ -121,7 +120,7 @@ const Vitrine = ({ session }) => {
         </div>
       </nav>
 
-      {/* HEADER ATUALIZADO NO GRAU */}
+      {/* HEADER NO GRAU */}
       <header className="pt-16 pb-12 px-6 text-center max-w-6xl mx-auto">
         <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-[1000] italic uppercase leading-[0.9] tracking-tighter mb-8 bg-gradient-to-b from-white via-white to-gray-600 bg-clip-text text-transparent">
           O CARRO DOS <br /> 
@@ -129,22 +128,13 @@ const Vitrine = ({ session }) => {
             SEUS SONHOS.
           </span>
         </h2>
-        
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             <button onClick={() => setFiltro('todos')} className={`px-5 py-2 rounded-full text-[9px] font-black uppercase italic border transition-all ${filtro === 'todos' ? 'bg-white text-black' : 'border-white/10 text-gray-500'}`}>Estoque</button>
             <button onClick={() => setFiltro('promissoria')} className={`px-5 py-2 rounded-full text-[9px] font-black uppercase italic border transition-all ${filtro === 'promissoria' ? 'bg-orange-600 border-orange-600 text-white' : 'border-orange-600/30 text-orange-600'}`}>📝 Promissória</button>
             <button onClick={() => setFiltro('financiamento')} className={`px-5 py-2 rounded-full text-[9px] font-black uppercase italic border transition-all ${filtro === 'financiamento' ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-600/30 text-blue-600'}`}>🏦 Financiamento</button>
           </div>
-          <div className="relative group">
-            <input 
-              type="text" 
-              placeholder="Pesquisar por modelo ou marca..." 
-              className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] outline-none focus:border-orange-600 text-center italic transition-all" 
-              value={busca} 
-              onChange={(e) => setBusca(e.target.value)} 
-            />
-          </div>
+          <input type="text" placeholder="Busque sua máquina..." className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] outline-none focus:border-orange-600 text-center italic transition-all" value={busca} onChange={(e) => setBusca(e.target.value)} />
         </div>
       </header>
 
@@ -180,21 +170,22 @@ const Vitrine = ({ session }) => {
             </div>
             <div className="space-y-3">
               <input type="text" placeholder="Nome Completo" className="w-full bg-white/5 p-4 rounded-2xl border border-white/10 text-xs outline-none focus:border-orange-600" value={perfil.nome} onChange={(e) => setPerfil({...perfil, nome: e.target.value})} />
-              <input type="text" placeholder="WhatsApp (DDD + Número)" className="w-full bg-white/5 p-4 rounded-2xl border border-white/10 text-xs outline-none focus:border-orange-600" value={perfil.whatsapp} onChange={(e) => setPerfil({...perfil, whatsapp: e.target.value})} />
+              <input type="text" placeholder="WhatsApp" className="w-full bg-white/5 p-4 rounded-2xl border border-white/10 text-xs outline-none focus:border-orange-600" value={perfil.whatsapp} onChange={(e) => setPerfil({...perfil, whatsapp: e.target.value})} />
             </div>
-            <button onClick={salvarPerfil} className="w-full bg-orange-600 text-white font-[1000] py-5 rounded-2xl text-[10px] uppercase italic shadow-2xl shadow-orange-600/20">Salvar Alterações</button>
-            <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="w-full text-gray-700 font-black text-[9px] uppercase tracking-widest">Sair da Sessão</button>
+            <button onClick={salvarPerfil} className="w-full bg-orange-600 text-white font-[1000] py-5 rounded-2xl text-[10px] uppercase italic shadow-2xl shadow-orange-600/20">Salvar</button>
+            <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="w-full text-gray-700 font-black text-[9px] uppercase tracking-widest">Sair</button>
           </div>
         </div>
       )}
 
+      {/* FOOTER COM LINKS FUNCIONANDO PARA /POLITICA */}
       <footer className="bg-[#050505] border-t border-white/5 py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <h1 className="text-2xl font-[1000] italic tracking-tighter">MOTOR<span className="text-orange-600">ZÃO</span></h1>
           <div className="flex flex-wrap justify-center gap-8 text-[9px] font-black text-gray-600 uppercase italic">
-            <a href="/politica" className="hover:text-white transition-colors">Quem Somos</a>
-            <a href="/politica" className="hover:text-white transition-colors">Privacidade</a>
-            <a href="/politica" className="hover:text-white transition-colors">Cookies</a>
+            <Link to="/politica" className="hover:text-white transition-colors">Quem Somos</Link>
+            <Link to="/politica" className="hover:text-white transition-colors">Privacidade</Link>
+            <Link to="/politica" className="hover:text-white transition-colors">Cookies</Link>
           </div>
           <div className="pt-4">
             <p className="text-gray-800 text-[8px] font-black uppercase tracking-[0.5em] mb-2">Eagle Ads Tech © 2026 • Todos os direitos reservados</p>
