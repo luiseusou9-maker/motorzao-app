@@ -2,26 +2,29 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "./lib/supabase"; 
 import Vitrine from "./Vitrine";
 import PDV from "./PDV"; 
+import Politica from "./Politica"; // NOVO: Importando a página que criamos
 
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-  // Pega o caminho atual da URL (ex: /PDV ou /)
   const [caminho, setCaminho] = useState(window.location.pathname);
 
   useEffect(() => {
-    // 1. Busca a sessão inicial do usuário
+    // 1. Busca a sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
-    // 2. Escuta mudanças no login (entrar/sair)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // 2. Escuta mudanças no login
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      
+      if (event === 'SIGNED_IN') {
+        setCaminho(window.location.pathname);
+      }
     });
 
-    // 3. Escuta o botão "voltar" do navegador para não quebrar o roteamento
     const handleLocationChange = () => setCaminho(window.location.pathname);
     window.addEventListener('popstate', handleLocationChange);
 
@@ -31,7 +34,6 @@ function App() {
     };
   }, []);
 
-  // Tela de boot personalizada
   if (loading) {
     return (
       <div className="h-screen bg-black flex items-center justify-center">
@@ -42,14 +44,19 @@ function App() {
     );
   }
 
-  // 🛠️ Roteamento Inteligente
-  // Se o cara tentar entrar no /PDV sem ser você, o PDV já tem a trava lá dentro,
-  // mas aqui a gente garante que ele receba a session.
+  // 🛠️ ROTEAMENTO DAS PÁGINAS
+
+  // Rota para Políticas e Quem Somos
+  if (caminho === '/politica') {
+    return <Politica />;
+  }
+
+  // Rota para o Painel de Administração
   if (caminho === '/PDV') {
     return <PDV session={session} />;
   }
 
-  // Por padrão, mostra a vitrine
+  // Por padrão, mostra a vitrine (Home)
   return <Vitrine session={session} />;
 }
 

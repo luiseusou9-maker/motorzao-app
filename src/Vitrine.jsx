@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import LoginModal from './LoginModal';
+import CookieConsent from './CookieConsent'; // IMPORTADO
 
 const Vitrine = ({ session }) => {
   const [estoque, setEstoque] = useState([]);
@@ -12,12 +13,12 @@ const Vitrine = ({ session }) => {
   const [showPerfil, setShowPerfil] = useState(false);
   const [perfil, setPerfil] = useState({ nome: '', whatsapp: '', avatar: '' });
   const [fotoAtiva, setFotoAtiva] = useState(0);
+  const [zoomFoto, setZoomFoto] = useState(null);
 
   const SEU_ZAP = "5519990181496";
   const isAdmin = session?.user?.email?.trim().toLowerCase() === 'luiseusou9@gmail.com';
 
   useEffect(() => {
-    // TIMER DE 10 SEGUNDOS PARA LOGIN AUTOMÁTICO
     if (!session) {
       const timer = setTimeout(() => {
         setShowLogin(true);
@@ -31,7 +32,7 @@ const Vitrine = ({ session }) => {
         if (data) setPerfil({ nome: data.full_name || '', whatsapp: data.whatsapp || '', avatar: data.avatar_url || '' });
       };
       buscarPerfil();
-      setShowLogin(false); // Fecha o modal se o login for detectado
+      setShowLogin(false);
     }
 
     const carregar = async () => {
@@ -60,26 +61,38 @@ const Vitrine = ({ session }) => {
     const fotos = c.fotos || [];
     return (
       <div className="fixed inset-0 z-[400] bg-black overflow-y-auto animate-in slide-in-from-bottom duration-500">
+        {zoomFoto && (
+          <div onClick={() => setZoomFoto(null)} className="fixed inset-0 z-[1000] bg-black/98 flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
+            <button className="absolute top-10 right-10 text-white text-2xl font-black">✕</button>
+            <img src={zoomFoto} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" alt="Zoom" />
+          </div>
+        )}
+
         <div className="max-w-5xl mx-auto p-4 md:p-12">
           <button onClick={() => {setCarroSelecionado(null); setFotoAtiva(0);}} className="mb-6 text-[10px] font-[1000] uppercase text-orange-600 tracking-widest">← VOLTAR AO PÁTIO</button>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div className="space-y-4">
-              <div className="rounded-[2.5rem] overflow-hidden bg-white/5 aspect-video border border-white/5">
-                <img src={fotos[fotoAtiva]} className="w-full h-full object-cover" alt="Carro" />
+              <div className="rounded-[2.5rem] overflow-hidden bg-white/5 aspect-video border border-white/5 cursor-zoom-in" onClick={() => setZoomFoto(fotos[fotoAtiva])}>
+                <img src={fotos[fotoAtiva]} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" alt="Carro" />
               </div>
               <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
                 {fotos.map((img, idx) => (
-                  <img key={idx} src={img} onClick={() => setFotoAtiva(idx)} className={`w-24 h-16 object-cover rounded-xl cursor-pointer border-2 transition-all ${fotoAtiva === idx ? 'border-orange-600 scale-95' : 'border-transparent opacity-50'}`} />
+                  <img key={idx} src={img} onClick={() => setFotoAtiva(idx)} className={`w-24 h-16 object-cover rounded-xl cursor-pointer border-2 transition-all ${fotoAtiva === idx ? 'border-orange-600 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`} />
                 ))}
               </div>
+              <p className="text-[8px] text-gray-600 uppercase font-bold italic text-center">Dica: Clique na foto para ampliar</p>
             </div>
             <div className="flex flex-col justify-center">
-              <h2 className="text-5xl font-[1000] italic uppercase leading-none mb-4 tracking-tighter">{c.modelo}</h2>
+              <h2 className="text-4xl md:text-5xl font-[1000] italic uppercase leading-none mb-4 tracking-tighter">{c.modelo}</h2>
               <div className="flex gap-3 mb-6">
                 <span className="bg-orange-600 px-4 py-1.5 rounded-full text-[9px] font-black uppercase italic shadow-lg shadow-orange-600/20">{c.modalidade}</span>
                 <span className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[9px] font-black uppercase italic text-gray-400">{c.cambio}</span>
               </div>
-              <p className="text-6xl font-mono font-[1000] text-[#00FF00] mb-8 tracking-tighter italic">R$ {c.preco?.toLocaleString('pt-BR')}</p>
+              
+              <p className="text-5xl md:text-6xl font-mono font-[1000] text-[#00FF00] mb-8 tracking-tighter italic whitespace-nowrap">
+                R$ {c.preco?.toLocaleString('pt-BR')}
+              </p>
+
               <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5 mb-8">
                 <p className="text-gray-400 text-sm leading-relaxed italic">{c.descricao}</p>
               </div>
@@ -93,9 +106,8 @@ const Vitrine = ({ session }) => {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-orange-600">
-      {/* HEADER DINÂMICO */}
       <nav className="sticky top-0 z-[100] bg-black/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-[1000] italic tracking-tighter" onClick={() => window.location.reload()}>MOTOR<span className="text-orange-600">ZÃO</span></h1>
+        <h1 className="text-xl font-[1000] italic tracking-tighter cursor-pointer" onClick={() => window.location.reload()}>MOTOR<span className="text-orange-600">ZÃO</span></h1>
         <div className="flex gap-3 items-center">
           {isAdmin && <button onClick={() => window.location.href='/PDV'} className="text-[9px] font-black bg-orange-600/10 border border-orange-600/40 px-4 py-2 rounded-xl text-orange-500 uppercase italic">Painel Admin</button>}
           {session ? (
@@ -109,7 +121,6 @@ const Vitrine = ({ session }) => {
         </div>
       </nav>
 
-      {/* TITULO ATRATIVO */}
       <header className="pt-20 pb-12 px-6 text-center max-w-6xl mx-auto">
         <h2 className="text-6xl md:text-9xl font-[1000] italic uppercase leading-[0.85] tracking-tighter mb-8 bg-gradient-to-b from-white to-gray-600 bg-clip-text text-transparent">
           O CARRO DOS <br /> <span className="text-orange-600 text-shadow-xl">SEUS SONHOS.</span>
@@ -124,7 +135,6 @@ const Vitrine = ({ session }) => {
         </div>
       </header>
 
-      {/* PÁTIO RESPONSIVO */}
       <main className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32">
         {carregando ? (
           <p className="col-span-full text-center text-[10px] font-black text-gray-800 uppercase animate-pulse py-20 tracking-[1em]">Alinhando Estoque...</p>
@@ -146,7 +156,6 @@ const Vitrine = ({ session }) => {
         ))}
       </main>
 
-      {/* MODAL PERFIL */}
       {showPerfil && (
         <div className="fixed inset-0 z-[600] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 animate-in zoom-in-95 duration-300">
           <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-[3rem] p-10 space-y-6 relative">
@@ -166,19 +175,24 @@ const Vitrine = ({ session }) => {
         </div>
       )}
 
-      {/* FOOTER POLÍTICAS */}
+      {/* FOOTER ATUALIZADO COM LINKS E ASSINATURA */}
       <footer className="bg-[#050505] border-t border-white/5 py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <h1 className="text-2xl font-[1000] italic tracking-tighter">MOTOR<span className="text-orange-600">ZÃO</span></h1>
           <div className="flex flex-wrap justify-center gap-8 text-[9px] font-black text-gray-600 uppercase italic">
-            <a href="#" className="hover:text-white transition-colors">Políticas de Privacidade</a>
-            <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-            <a href="#" className="hover:text-white transition-colors">Cookies</a>
+            <a href="/politica" className="hover:text-white transition-colors">Quem Somos</a>
+            <a href="/politica" className="hover:text-white transition-colors">Privacidade</a>
+            <a href="/politica" className="hover:text-white transition-colors">Cookies</a>
           </div>
-          <p className="text-gray-800 text-[8px] font-black uppercase tracking-[0.5em]">Eagle Ads Tech © 2026 • Todos os direitos reservados</p>
+          <div className="pt-4">
+            <p className="text-gray-800 text-[8px] font-black uppercase tracking-[0.5em] mb-2">Eagle Ads Tech © 2026 • Todos os direitos reservados</p>
+            <p className="text-orange-600/50 text-[7px] font-black uppercase tracking-[0.8em] animate-pulse">DEVELOPER LUIS</p>
+          </div>
         </div>
       </footer>
 
+      {/* MODAL DE COOKIES E LOGIN */}
+      <CookieConsent />
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>
   );
