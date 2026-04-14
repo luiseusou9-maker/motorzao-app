@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@reference "tailwindcss";
+
+@theme {
+  --color-vermelho: #FF0000;
+  --color-vermelho-dark: #CC0000;
+}
+
+body {
+  background-color: #000;
+  color: #fff;
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.btn-primary {
+  background-color: var(--color-vermelho);
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
