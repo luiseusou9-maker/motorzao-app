@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // IMPORTADO PARA OS LINKS FUNCIONAREM
 import { supabase } from './lib/supabase';
 import LoginModal from './LoginModal';
 import CookieConsent from './CookieConsent';
@@ -20,7 +19,6 @@ const Vitrine = ({ session }) => {
   const isAdmin = session?.user?.email?.trim().toLowerCase() === 'luiseusou9@gmail.com';
 
   useEffect(() => {
-    // 1. CARREGAR ESTOQUE IMEDIATAMENTE (SEM TRAVA)
     const carregar = async () => {
       setCarregando(true);
       const { data } = await supabase.from('cars').select('*').order('created_at', { ascending: false });
@@ -29,7 +27,6 @@ const Vitrine = ({ session }) => {
     };
     carregar();
 
-    // 2. LÓGICA DE LOGIN (APENAS PARA O MODAL)
     if (!session) {
       const timer = setTimeout(() => {
         setShowLogin(true);
@@ -120,11 +117,10 @@ const Vitrine = ({ session }) => {
         </div>
       </nav>
 
-      {/* HEADER NO GRAU */}
       <header className="pt-16 pb-12 px-6 text-center max-w-6xl mx-auto">
         <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-[1000] italic uppercase leading-[0.9] tracking-tighter mb-8 bg-gradient-to-b from-white via-white to-gray-600 bg-clip-text text-transparent">
           O CARRO DOS <br /> 
-          <span className="text-orange-600 drop-shadow-[0_0_30px_rgba(234,88,12,0.3)]">
+          <span className="text-orange-600 drop-shadow-[0_0_30_rgba(234,88,12,0.3)]">
             SEUS SONHOS.
           </span>
         </h2>
@@ -178,14 +174,14 @@ const Vitrine = ({ session }) => {
         </div>
       )}
 
-      {/* FOOTER COM LINKS FUNCIONANDO PARA /POLITICA */}
       <footer className="bg-[#050505] border-t border-white/5 py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <h1 className="text-2xl font-[1000] italic tracking-tighter">MOTOR<span className="text-orange-600">ZÃO</span></h1>
           <div className="flex flex-wrap justify-center gap-8 text-[9px] font-black text-gray-600 uppercase italic">
-            <Link to="/politica" className="hover:text-white transition-colors">Quem Somos</Link>
-            <Link to="/politica" className="hover:text-white transition-colors">Privacidade</Link>
-            <Link to="/politica" className="hover:text-white transition-colors">Cookies</Link>
+            {/* LINKS ATUALIZADOS PARA O SEU ROTEADOR MANUAL */}
+            <a href="/politica" className="hover:text-white transition-colors">Quem Somos</a>
+            <a href="/politica" className="hover:text-white transition-colors">Privacidade</a>
+            <a href="/politica" className="hover:text-white transition-colors">Cookies</a>
           </div>
           <div className="pt-4">
             <p className="text-gray-800 text-[8px] font-black uppercase tracking-[0.5em] mb-2">Eagle Ads Tech © 2026 • Todos os direitos reservados</p>

@@ -5,12 +5,19 @@ const LoginModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const handleGoogleLogin = async () => {
+    // Definimos a URL de redirecionamento. 
+    // Se estiver no ar, usa o link da Vercel. Se estiver no PC, usa o localhost.
+    const redirectUrl = import.meta.env.PROD 
+      ? 'https://motorzao-app.vercel.app' 
+      : window.location.origin;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin // Garante que volta para a Home
+        redirectTo: redirectUrl
       }
     });
+    
     if (error) console.error('Erro no login:', error.message);
   };
 
