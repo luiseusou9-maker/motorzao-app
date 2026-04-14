@@ -121,17 +121,30 @@ const Vitrine = ({ session }) => {
         </div>
       </nav>
 
-      <header className="pt-20 pb-12 px-6 text-center max-w-6xl mx-auto">
-        <h2 className="text-6xl md:text-9xl font-[1000] italic uppercase leading-[0.85] tracking-tighter mb-8 bg-gradient-to-b from-white to-gray-600 bg-clip-text text-transparent">
-          O CARRO DOS <br /> <span className="text-orange-600 text-shadow-xl">SEUS SONHOS.</span>
+      {/* HEADER ATUALIZADO NO GRAU */}
+      <header className="pt-16 pb-12 px-6 text-center max-w-6xl mx-auto">
+        <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-[1000] italic uppercase leading-[0.9] tracking-tighter mb-8 bg-gradient-to-b from-white via-white to-gray-600 bg-clip-text text-transparent">
+          O CARRO DOS <br /> 
+          <span className="text-orange-600 drop-shadow-[0_0_30px_rgba(234,88,12,0.3)]">
+            SEUS SONHOS.
+          </span>
         </h2>
+        
         <div className="max-w-2xl mx-auto space-y-6">
-          <div className="flex flex-wrap justify-center gap-3">
-            <button onClick={() => setFiltro('todos')} className={`px-6 py-2 rounded-full text-[10px] font-black uppercase italic border transition-all ${filtro === 'todos' ? 'bg-white text-black' : 'border-white/10 text-gray-500'}`}>Estoque Completo</button>
-            <button onClick={() => setFiltro('promissoria')} className={`px-6 py-2 rounded-full text-[10px] font-black uppercase italic border transition-all ${filtro === 'promissoria' ? 'bg-orange-600 border-orange-600 text-white' : 'border-orange-600/30 text-orange-600'}`}>📝 Na Promissória</button>
-            <button onClick={() => setFiltro('financiamento')} className={`px-6 py-2 rounded-full text-[10px] font-black uppercase italic border transition-all ${filtro === 'financiamento' ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-600/30 text-blue-600'}`}>🏦 Financiamento</button>
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+            <button onClick={() => setFiltro('todos')} className={`px-5 py-2 rounded-full text-[9px] font-black uppercase italic border transition-all ${filtro === 'todos' ? 'bg-white text-black' : 'border-white/10 text-gray-500'}`}>Estoque</button>
+            <button onClick={() => setFiltro('promissoria')} className={`px-5 py-2 rounded-full text-[9px] font-black uppercase italic border transition-all ${filtro === 'promissoria' ? 'bg-orange-600 border-orange-600 text-white' : 'border-orange-600/30 text-orange-600'}`}>📝 Promissória</button>
+            <button onClick={() => setFiltro('financiamento')} className={`px-5 py-2 rounded-full text-[9px] font-black uppercase italic border transition-all ${filtro === 'financiamento' ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-600/30 text-blue-600'}`}>🏦 Financiamento</button>
           </div>
-          <input type="text" placeholder="Pesquisar por modelo, marca ou palavra-chave..." className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-xs outline-none focus:border-orange-600 text-center italic" value={busca} onChange={(e) => setBusca(e.target.value)} />
+          <div className="relative group">
+            <input 
+              type="text" 
+              placeholder="Pesquisar por modelo ou marca..." 
+              className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-[11px] outline-none focus:border-orange-600 text-center italic transition-all" 
+              value={busca} 
+              onChange={(e) => setBusca(e.target.value)} 
+            />
+          </div>
         </div>
       </header>
 
@@ -175,7 +188,6 @@ const Vitrine = ({ session }) => {
         </div>
       )}
 
-      {/* FOOTER ATUALIZADO COM LINKS E ASSINATURA */}
       <footer className="bg-[#050505] border-t border-white/5 py-20 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <h1 className="text-2xl font-[1000] italic tracking-tighter">MOTOR<span className="text-orange-600">ZÃO</span></h1>
@@ -191,7 +203,6 @@ const Vitrine = ({ session }) => {
         </div>
       </footer>
 
-      {/* MODAL DE COOKIES E LOGIN */}
       <CookieConsent />
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>

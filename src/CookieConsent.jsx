@@ -31,7 +31,7 @@ const CookieConsent = () => {
           onClick={aceitar} 
           className="flex-1 bg-white text-black text-[10px] font-[1000] uppercase italic py-5 rounded-2xl hover:bg-orange-600 hover:text-white transition-all active:scale-95"
         >
-          ACORDADO
+          ACEITAR
         </button>
         <button 
           onClick={() => window.location.href='/politica'} 
